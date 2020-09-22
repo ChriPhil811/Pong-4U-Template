@@ -1,5 +1,5 @@
 ﻿/*
- * Description:     A basic PONG simulator
+ * Description:     POWER PONG
  * Author:           Christopher Phillis
  * Date:            September 21, 2020
  */
@@ -28,7 +28,7 @@ namespace Pong
         //graphics objects for drawing
         SolidBrush drawBrush = new SolidBrush(Color.White);
         SolidBrush redBrush = new SolidBrush(Color.Red);
-        SolidBrush blueBrush = new SolidBrush(Color.Blue);
+        SolidBrush yellowBrush = new SolidBrush(Color.Yellow);
         Font drawFont = new Font("Courier New", 10);
 
         // Sounds for game
@@ -45,6 +45,7 @@ namespace Pong
         Boolean ballMoveRight = true;
         Boolean ballMoveDown = true;
         int ballSpeed = 4;
+        int ballAngle = 4;
         Rectangle ball;
 
         //paddle speeds and rectangles
@@ -141,6 +142,7 @@ namespace Pong
 
             p1.Width = p2.Width = 10;    //height for both paddles set the same
             p1.Height = p2.Height = 60;  //width for both paddles set the same
+            paddleSpeed = 4; //paddle speed reset
 
             //p1 starting position
             p1.X = PADDLE_EDGE;
@@ -150,19 +152,18 @@ namespace Pong
             p2.X = this.Width - PADDLE_EDGE - p2.Width;
             p2.Y = this.Height / 2 - p2.Height / 2;
 
-            //ball dimensions
-            ball.Width = 6;
-            ball.Height = 6;
+            //ball dimensions and speed
+            ball.Width = 10;
+            ball.Height = 10;
+            ballSpeed = 4; //ball speed reset
+            ballAngle = 4; //ball angle reset
 
             //ball starting position
             ball.X = this.Width / 2 - ball.Width / 2;
             ball.Y = this.Height / 2 - ball.Height / 2;
 
-            //power up dimensions
-            ballPower.Width = 10;
-            ballPower.Height = 10;
-            paddlePower.Height = 10;
-            paddlePower.Height = 10;
+            //power up dimensions (all the same)
+            ballPower.Width = ballPower.Height = paddlePower.Width = paddlePower.Height = 20;
         }
 
         /// <summary>
@@ -174,7 +175,7 @@ namespace Pong
 
             #region update ball position
 
-            // TODO create code to move ball either left or right based on ballMoveRight and using BALL_SPEED
+            //Left-Right movement
             if(ballMoveRight == true)
             {
                 ball.X = ball.X + ballSpeed;
@@ -184,14 +185,14 @@ namespace Pong
                 ball.X = ball.X - ballSpeed;
             }
 
-            // TODO create code move ball either down or up based on ballMoveDown and using BALL_SPEED
+            //Down-Up Movement
             if(ballMoveDown == true)
             {
-                ball.Y = ball.Y + ballSpeed;
+                ball.Y = ball.Y + ballAngle;
             }
             else
             {
-                ball.Y = ball.Y - ballSpeed;
+                ball.Y = ball.Y - ballAngle;
             }
             #endregion
 
@@ -239,12 +240,14 @@ namespace Pong
             if(p1.IntersectsWith(ball))
             {
                 ballMoveRight = true;
+                ball.Y = ball.Y + (ballAngle = randGen.Next(1, 8));
                 collisionSound.Play();
             }
 
             if(p2.IntersectsWith(ball))
             {
                 ballMoveRight = false;
+                ball.Y = ball.Y + (ballAngle = randGen.Next(1, 8));
                 collisionSound.Play();
             }
 
@@ -310,8 +313,7 @@ namespace Pong
 
             #region Power Ups
 
-            //TODO  timer every 5 seconds
-            //random power up positions
+            //random power up positions every 10 seconds
             timer++;
 
             if(timer > 160)
@@ -319,22 +321,22 @@ namespace Pong
                 timer = 0;
 
                 ballPower.X = randGen.Next(25, this.Width - 25);
-                ballPower.Y = randGen.Next(10, this.Height - 10);
+                ballPower.Y = randGen.Next(20, this.Height - 20);
                 paddlePower.X = randGen.Next(25, this.Width - 25);
-                paddlePower.Y = randGen.Next(10, this.Height - 10);
+                paddlePower.Y = randGen.Next(20, this.Height - 20);
             }
 
             //ball power makes ball and paddles faster
-            //TODO paddle power makes paddles smaller
             if(ball.IntersectsWith(ballPower))
             {
                 ballSpeed = ballSpeed + 2;
                 paddleSpeed = paddleSpeed + 2;
             }
 
+            //paddle power makes paddles bigger or smaller
             if(ball.IntersectsWith(paddlePower))
             {
-                p1.Height = p2.Height = 40;
+                p1.Height = p2.Height = randGen.Next(30, 100);
             }
 
 
@@ -376,7 +378,7 @@ namespace Pong
 
             //draw power ups 
             e.Graphics.FillRectangle(redBrush, ballPower);
-            e.Graphics.FillRectangle(blueBrush, paddlePower);
+            e.Graphics.FillRectangle(yellowBrush, paddlePower);
 
             //draw scores
             e.Graphics.DrawString(player1Score.ToString(), drawFont, drawBrush, 0, 0);
